@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SoundDrop · Dashboard vendite</title>
+  <meta name="description" content="Dashboard interattiva delle vendite di biglietti SoundDrop: incassi, generi, canali, città ed eventi.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/vendor/leaflet.css">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <header class="testata">
+    <div class="contenitore testata__riga">
+      <div class="marchio">
+        <span class="marchio__punto" aria-hidden="true"></span>
+        <span class="marchio__nome">SoundDrop</span>
+        <span class="marchio__pagina">Dashboard vendite</span>
+      </div>
+      <div class="filtri" role="group" aria-label="Filtri">
+        <label class="filtro">
+          <span class="filtro__etichetta">Anno</span>
+          <select id="filtro-anno"></select>
+        </label>
+        <label class="filtro">
+          <span class="filtro__etichetta">Genere</span>
+          <select id="filtro-genere"></select>
+        </label>
+        <a class="pulsante" href="download/SoundDrop-PowerBI.zip" download>Scarica il progetto Power BI</a>
+      </div>
+    </div>
+    <div class="contenitore">
+      <p class="testata__sotto">Vendite di biglietti per concerti e festival in 12 città italiane, gennaio 2025 - settembre 2026. Dati di esempio.</p>
+    </div>
+  </header>
+
+  <main class="contenitore">
+    <section class="kpi" aria-label="Indicatori principali">
+      <article class="kpi__tile"><h2 class="kpi__label">Incasso</h2><p class="kpi__valore" id="kpi-incasso">-</p><p class="kpi__nota" id="kpi-incasso-nota"></p></article>
+      <article class="kpi__tile"><h2 class="kpi__label">Variazione vs anno precedente</h2><p class="kpi__valore" id="kpi-variazione">-</p><p class="kpi__nota" id="kpi-variazione-nota"></p></article>
+      <article class="kpi__tile"><h2 class="kpi__label">Biglietti venduti</h2><p class="kpi__valore" id="kpi-biglietti">-</p><p class="kpi__nota" id="kpi-biglietti-nota"></p></article>
+      <article class="kpi__tile"><h2 class="kpi__label">Prezzo medio biglietto</h2><p class="kpi__valore" id="kpi-prezzo">-</p><p class="kpi__nota">incasso / biglietti</p></article>
+      <article class="kpi__tile"><h2 class="kpi__label">Tasso di riempimento</h2><p class="kpi__valore" id="kpi-riempimento">-</p><p class="kpi__nota">biglietti / capienza degli eventi</p></article>
+    </section>
+
+    <section class="griglia">
+      <article class="scheda s8" data-scheda="trend">
+        <header class="scheda__testa">
+          <div><h3>Incasso mensile</h3><p class="scheda__sotto" id="trend-sotto"></p></div>
+          <button class="scheda__vista" type="button">Tabella</button>
+        </header>
+        <div class="scheda__corpo"><div class="area-grafico alto"><canvas id="g-trend" role="img" aria-label="Andamento mensile dell'incasso"></canvas></div></div>
+      </article>
+
+      <article class="scheda s4" data-scheda="genere">
+        <header class="scheda__testa">
+          <div><h3>Incasso per genere</h3><p class="scheda__sotto">Clic su una barra per filtrare</p></div>
+          <button class="scheda__vista" type="button">Tabella</button>
+        </header>
+        <div class="scheda__corpo"><div class="area-grafico alto"><canvas id="g-genere" role="img" aria-label="Incasso per genere musicale"></canvas></div></div>
+      </article>
+
+      <article class="scheda s8" data-scheda="top">
+        <header class="scheda__testa">
+          <div><h3>Top 5 eventi per incasso</h3><p class="scheda__sotto">Clic su un evento per il dettaglio</p></div>
+          <button class="scheda__vista" type="button">Tabella</button>
+        </header>
+        <div class="scheda__corpo"><div class="area-grafico"><canvas id="g-top" role="img" aria-label="I cinque eventi con l'incasso più alto"></canvas></div></div>
+      </article>
+
+      <article class="scheda s4" data-scheda="canali">
+        <header class="scheda__testa">
+          <div><h3>Incasso per canale</h3><p class="scheda__sotto">Dove vengono acquistati i biglietti</p></div>
+          <button class="scheda__vista" type="button">Tabella</button>
+        </header>
+        <div class="scheda__corpo"><div class="area-grafico"><canvas id="g-canali" role="img" aria-label="Incasso per canale di vendita"></canvas></div></div>
+      </article>
+
+      <article class="scheda s6" data-scheda="mappa">
+        <header class="scheda__testa">
+          <div><h3>Incasso per città</h3><p class="scheda__sotto">La dimensione del cerchio è proporzionale all'incasso</p></div>
+          <button class="scheda__vista" type="button">Tabella</button>
+        </header>
+        <div class="scheda__corpo"><div class="area-mappa" id="mappa" role="img" aria-label="Mappa dell'incasso per città"></div></div>
+      </article>
+
+      <article class="scheda s6" data-scheda="riempimento">
+        <header class="scheda__testa">
+          <div><h3>Riempimento per città</h3><p class="scheda__sotto">Biglietti venduti sulla capienza degli eventi</p></div>
+          <button class="scheda__vista" type="button">Tabella</button>
+        </header>
+        <div class="scheda__corpo"><div class="area-grafico alto"><canvas id="g-riempimento" role="img" aria-label="Tasso di riempimento per città"></canvas></div></div>
+      </article>
+
+      <article class="scheda s12" data-scheda="classifica">
+        <header class="scheda__testa">
+          <div><h3>Classifica eventi</h3><p class="scheda__sotto">Clic su una riga per il dettaglio dell'evento</p></div>
+        </header>
+        <div class="tabella-scorrevole">
+          <table class="tabella" id="classifica">
+            <thead><tr><th class="num">#</th><th>Evento</th><th class="secondaria">Città</th><th class="secondaria">Genere</th><th class="num secondaria">Biglietti</th><th class="num secondaria">Riempimento</th><th class="num">Incasso</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <button class="mostra-tutti" type="button" id="mostra-tutti">Mostra tutti gli eventi</button>
+      </article>
+    </section>
+  </main>
+
+  <footer class="contenitore piede">
+    <p>SoundDrop · progetto Power BI e versione web interattiva · dati di esempio</p>
+  </footer>
+
+  <dialog class="dettaglio" id="dettaglio" aria-labelledby="dettaglio-titolo">
+    <header class="dettaglio__testa">
+      <div>
+        <p class="dettaglio__occhiello">Dettaglio evento</p>
+        <h2 id="dettaglio-titolo"></h2>
+        <ul class="dettaglio__info" id="dettaglio-info"></ul>
+      </div>
+      <button class="dettaglio__chiudi" type="button" id="dettaglio-chiudi">Chiudi</button>
+    </header>
+    <section class="kpi kpi--compatto" aria-label="Indicatori dell'evento">
+      <article class="kpi__tile"><h3 class="kpi__label">Incasso</h3><p class="kpi__valore" id="d-incasso"></p></article>
+      <article class="kpi__tile"><h3 class="kpi__label">Biglietti venduti</h3><p class="kpi__valore" id="d-biglietti"></p></article>
+      <article class="kpi__tile"><h3 class="kpi__label">Tasso di riempimento</h3><p class="kpi__valore" id="d-riempimento"></p></article>
+      <article class="kpi__tile"><h3 class="kpi__label">Prezzo medio</h3><p class="kpi__valore" id="d-prezzo"></p></article>
+    </section>
+    <div class="dettaglio__grafici">
+      <article class="scheda">
+        <header class="scheda__testa"><div><h3>Biglietti venduti per giorno</h3><p class="scheda__sotto">Andamento delle vendite fino alla data dell'evento</p></div></header>
+        <div class="area-grafico"><canvas id="g-curva" role="img" aria-label="Biglietti venduti per giorno"></canvas></div>
+      </article>
+      <article class="scheda">
+        <header class="scheda__testa"><div><h3>Biglietti per canale</h3></div></header>
+        <div class="area-grafico"><canvas id="g-dettaglio-canali" role="img" aria-label="Biglietti per canale"></canvas></div>
+      </article>
+    </div>
+  </dialog>
+
+  <script src="assets/vendor/chart.umd.min.js"></script>
+  <script src="assets/vendor/leaflet.js"></script>
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
